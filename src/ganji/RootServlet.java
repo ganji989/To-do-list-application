@@ -54,7 +54,7 @@ public class RootServlet extends HttpServlet {
 					else
 						current_tasks+="<input type=\"checkbox\" >";
 					
-					current_tasks +="  TASK : " + ctemp.getName() + "  DATE : " + ctemp.getDate() +"  -----  <input type=\"submit\" name=\"" + (i+"e") + "\" value=\"Edit\" \\><input type=\"submit\" name=\"" + (i + "dlt") + "\" value=\"Delete\" \\></br>";
+					current_tasks +="  TASK : " + ctemp.getName() + "  DATE : " + ctemp.getDate() +"  -----  <input type=\"submit\" name=\"" + (i+"e") + "\" value=\"Edit\" \\><input type=\"submit\" name=\"" + (i + "d") + "\" value=\"Delete\" \\></br>";
 				}			
 				current_tasks+="<br/><br/></form></div>";
 				req.setAttribute("to-do-list", current_tasks);
@@ -71,9 +71,34 @@ public class RootServlet extends HttpServlet {
 			pm.close();
 		}
 		
-		
 		// get a request dispatcher and launch a jsp that will render our page
 		RequestDispatcher rd = req.getRequestDispatcher("/WEB-INF/root.jsp");
 		rd.forward(req, resp);
 	}
+	
+	public void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+		// we need to get access to the google user service
+		UserService us = UserServiceFactory.getUserService();
+		com.google.appengine.api.users.User u = us.getCurrentUser();
+		if(u==null)
+			return;		
+		PersistenceManager pm = PMF.get().getPersistenceManager();
+		Key user_key = KeyFactory.createKey("User", u.getUserId());
+		ganji.User user =pm.getObjectById(ganji.User.class, user_key);
+		
+		for (int i=0;i<user.getTasks().size();i++){
+			if(req.getParameter((i+"d"))!=null){
+				//delete this user
+				pm.deletePersistent(user.getTasks().get(i));
+				pm.close();
+				PrintWriter out =resp.getWriter();
+				out.println("<script type=\"text/javascript\">");
+				out.println("alert('" + "Task Deleted !" + "');");
+				out.println("location=" +"'/'"+ ";");
+				out.println("</script>");
+				break;
+			}
+		}
+	}
+
 }
