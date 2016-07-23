@@ -60,4 +60,5 @@ public class Task {
 		checked=false;
 	}
 	public boolean isChecked(){return checked;}
+	public void setStatus(boolean b){checked=b;};
 }

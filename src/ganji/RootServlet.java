@@ -32,72 +32,121 @@ public class RootServlet extends HttpServlet {
 		req.setAttribute("logout_url", logout_url);
 		String addTask = "/add";
 		req.setAttribute("addLink", addTask);
-		
+
 		String uid;
 		PersistenceManager pm = PMF.get().getPersistenceManager();
-		try{
+		try {
 			if (u != null) {
 				uid = u.getUserId();
-				//displaying current appointments
+				// displaying current appointments
 				Key user_key = KeyFactory.createKey("User", uid);
 				ganji.User user;
-				//RETRIEVE USER
+				// RETRIEVE USER
 				user = pm.getObjectById(ganji.User.class, user_key);
-				String current_tasks="";
-				current_tasks="<div id= \"app\" class=\"boxed1\">\n"
-							 +"<form method=\"post\">\n"
-							 +"<h2>~Your Current To-do List~</h2><br/>\n";
-				for (int i=0;i<user.getTasks().size();i++) {
-					Task ctemp=user.getTasks().get(i);
+				String current_tasks = "";
+				current_tasks = "<div id= \"app\" class=\"boxed1\">\n" + "<form method=\"post\">\n"
+						+ "<h2>~Your Current To-do List~</h2><br/>\n";
+				for (int i = 0; i < user.getTasks().size(); i++) {
+					Task ctemp = user.getTasks().get(i);
 					if (ctemp.isChecked())
-						current_tasks+="<input type=\"checkbox\" checked>";
+						current_tasks += "<input type=\"checkbox\" name=\""+i+"complete\" checked>";
 					else
-						current_tasks+="<input type=\"checkbox\" >";
-					
-					current_tasks +="  TASK : " + ctemp.getName() + "  DATE : " + ctemp.getDate() +"  -----  <input type=\"submit\" name=\"" + (i+"e") + "\" value=\"Edit\" \\><input type=\"submit\" name=\"" + (i + "d") + "\" value=\"Delete\" \\></br>";
-				}			
-				current_tasks+="<br/><br/></form></div>";
+						current_tasks += "<input type=\"checkbox\" name=\""+i+"complete\" >";
+
+					current_tasks += "  TASK : " + ctemp.getName() + "  DATE : " + ctemp.getDate()
+							+ "  -----  <input type=\"submit\" name=\"" + (i + "e")
+							+ "\" value=\"Edit\" \\><input type=\"submit\" name=\"" + (i + "d")
+							+ "\" value=\"Delete\" \\></br>";
+				}
+				current_tasks += "</br><input type=\"submit\" style=\"height:8em; width:10em\" name=\"update\" value=\"update\" \\></br></br><br/><br/></form></div>";
 				req.setAttribute("to-do-list", current_tasks);
 			}
-		}catch(Exception e){
+		} catch (Exception e) {
 			req.setAttribute("to-do-list", null);
 			uid = u.getUserId();
 			Key user_key = KeyFactory.createKey("User", uid);
-			ganji.User user = new ganji.User(user_key,u.getEmail());
+			ganji.User user = new ganji.User(user_key, u.getEmail());
 			pm.makePersistent(user);
-			
-		}
-		finally{
+
+		} finally {
 			pm.close();
 		}
-		
+
 		// get a request dispatcher and launch a jsp that will render our page
 		RequestDispatcher rd = req.getRequestDispatcher("/WEB-INF/root.jsp");
 		rd.forward(req, resp);
 	}
-	
+
 	public void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 		// we need to get access to the google user service
 		UserService us = UserServiceFactory.getUserService();
 		com.google.appengine.api.users.User u = us.getCurrentUser();
-		if(u==null)
-			return;		
+		if (u == null)
+			return;
 		PersistenceManager pm = PMF.get().getPersistenceManager();
 		Key user_key = KeyFactory.createKey("User", u.getUserId());
-		ganji.User user =pm.getObjectById(ganji.User.class, user_key);
-		
-		for (int i=0;i<user.getTasks().size();i++){
-			if(req.getParameter((i+"d"))!=null){
-				//delete this user
+		ganji.User user = pm.getObjectById(ganji.User.class, user_key);
+
+		// updating status
+		if (req.getParameter("update") != null) {
+			if (user.getTasks().size()==0){
+				PrintWriter out=resp.getWriter();
+				out.println("<script type=\"text/javascript\">");
+				out.println("alert('" + "Nothing to update !" + "');");
+				out.println("location=" + "'/'" + ";");
+				out.println("</script>");
+			}
+			for (int i = 0; i < user.getTasks().size(); i++) {
+				boolean status;
+				if (req.getParameter(i + "complete") != null)
+					status = true;
+				else
+					status = false;
+
+				updateTaskStatus(user.getTasks().get(i).getId(), status, resp.getWriter());
+			}
+			return;
+		}
+
+		for (int i = 0; i < user.getTasks().size(); i++) {
+			if (req.getParameter((i + "d")) != null) {
+				// delete this user
 				pm.deletePersistent(user.getTasks().get(i));
 				pm.close();
-				PrintWriter out =resp.getWriter();
+				PrintWriter out = resp.getWriter();
 				out.println("<script type=\"text/javascript\">");
 				out.println("alert('" + "Task Deleted !" + "');");
-				out.println("location=" +"'/'"+ ";");
+				out.println("location=" + "'/'" + ";");
 				out.println("</script>");
 				break;
 			}
+		}
+	}
+
+	public void updateTaskStatus(Key key, boolean status, PrintWriter out) {
+		UserService us = UserServiceFactory.getUserService();
+		com.google.appengine.api.users.User u = us.getCurrentUser();
+		String uid = u.getUserId();
+		PersistenceManager pm = null;
+		Key user_key = KeyFactory.createKey("User", uid);
+		try {
+			// Check if the KEY exists...
+			pm = PMF.get().getPersistenceManager();
+			Task t = pm.getObjectById(Task.class, key);
+			t.setStatus(status);
+			pm.close();
+			out.println("<script type=\"text/javascript\">");
+			out.println("alert('" + "Status Updated !" + "');");
+			out.println("location=" + "'/'" + ";");
+			out.println("</script>");
+
+		} catch (Exception e) {
+			out.println("<script type=\"text/javascript\">");
+			out.println("alert('" + "Updation Failed !" + "');");
+			out.println("location=" + "'/'" + ";");
+			out.println("</script>");
+		} finally {
+			pm.close();
 		}
 	}
 
