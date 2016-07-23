@@ -21,6 +21,8 @@ public class Task {
 	@Persistent
 	String date;
 	@Persistent
+	boolean checked=false;
+	@Persistent
 	private User parent;
 	
 	public Key getId() {
@@ -51,4 +53,11 @@ public class Task {
 	public void setDate(String date) {
 		this.date = date;
 	}	
+	public void check(){
+		checked=true;
+	}
+	public void uncheck(){
+		checked=false;
+	}
+	public boolean isChecked(){return checked;}
 }

@@ -43,8 +43,24 @@ public class RootServlet extends HttpServlet {
 				ganji.User user;
 				//RETRIEVE USER
 				user = pm.getObjectById(ganji.User.class, user_key);
+				String current_tasks="";
+				current_tasks="<div id= \"app\" class=\"boxed1\">\n"
+							 +"<form method=\"post\">\n"
+							 +"<h2>~Your Current To-do List~</h2><br/>\n";
+				for (int i=0;i<user.getTasks().size();i++) {
+					Task ctemp=user.getTasks().get(i);
+					if (ctemp.isChecked())
+						current_tasks+="<input type=\"checkbox\" checked>";
+					else
+						current_tasks+="<input type=\"checkbox\" >";
+					
+					current_tasks +="  TASK : " + ctemp.getName() + "  DATE : " + ctemp.getDate() +"  -----  <input type=\"submit\" name=\"" + (i+"e") + "\" value=\"Edit\" \\><input type=\"submit\" name=\"" + (i + "dlt") + "\" value=\"Delete\" \\></br>";
+				}			
+				current_tasks+="<br/><br/></form></div>";
+				req.setAttribute("to-do-list", current_tasks);
 			}
 		}catch(Exception e){
+			req.setAttribute("to-do-list", null);
 			uid = u.getUserId();
 			Key user_key = KeyFactory.createKey("User", uid);
 			ganji.User user = new ganji.User(user_key,u.getEmail());

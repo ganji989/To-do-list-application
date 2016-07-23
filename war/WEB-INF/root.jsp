@@ -10,6 +10,9 @@
 .boxed {
 	border: 3px solid #C9C9C9;
 }
+.boxed1 {
+	border: 3px solid #78B848;
+}
 body {
     background-color: #959492;
 }
@@ -34,9 +37,18 @@ body {
 			<p style="text-align: center">
 				Welcome ${user.email} <br />
 			</p>
-			<p>
-				<a href="${addLink}">ADD TASK</a><br />
-			</p></br></br>
+			<button onclick="window.location='${addLink}';">ADD TASK</button>
+			</br></br>
+			<script>
+				if (document.getElementById("app")) {
+					document.getElementById("app").parentNode
+							.removeChild(document.getElementById("app"));
+				}
+			</script>
+			<%
+				out.write(request.getAttribute("to-do-list").toString());
+			%>
+			</br></br>
 			<p style="text-align: center">
 				You can signout <a href="${logout_url}">here</a><br />
 			</p>
