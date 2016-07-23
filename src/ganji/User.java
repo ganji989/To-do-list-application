@@ -1,5 +1,7 @@
 package ganji;
 
+import java.util.ArrayList;
+
 import javax.jdo.annotations.PersistenceCapable;
 import javax.jdo.annotations.Persistent;
 import javax.jdo.annotations.PrimaryKey;
@@ -14,9 +16,10 @@ public class User {
 	@Persistent
 	private Key id;
 	
-	// the list of contacts that are belonging to this user
-    // the parent variable of the Contact class will map the
-    // contact to the ContactUser.
+	@Persistent(mappedBy="parent")
+	//@Persistent(defaultFetchGroup = "true")
+	private ArrayList<Task> tasks;
+
 	public User(Key id ,String n){
 		email=n;
 		this.id=id;
@@ -33,5 +36,13 @@ public class User {
 	public void setId(Key id) {
 		this.id = id;
 	}
+	
+	public void addTask(Task t){
+		if (tasks==null)	
+			tasks=new ArrayList<Task>();
+    	tasks.add(t);
+    }
+	
+	public ArrayList<Task> getTasks(){ return tasks;}
 
 }

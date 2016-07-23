@@ -34,6 +34,9 @@ body {
 			<p style="text-align: center">
 				Welcome ${user.email} <br />
 			</p>
+			<p>
+				<a href="${addLink}">ADD TASK</a><br />
+			</p></br></br>
 			<p style="text-align: center">
 				You can signout <a href="${logout_url}">here</a><br />
 			</p>
