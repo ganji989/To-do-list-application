@@ -30,6 +30,30 @@ public class RootServlet extends HttpServlet {
 		req.setAttribute("user", u);
 		req.setAttribute("login_url", login_url);
 		req.setAttribute("logout_url", logout_url);
+		
+		String uid;
+		PersistenceManager pm = PMF.get().getPersistenceManager();
+		try{
+			if (u != null) {
+				uid = u.getUserId();
+				//displaying current appointments
+				Key user_key = KeyFactory.createKey("User", uid);
+				ganji.User user;
+				//RETRIEVE USER
+				user = pm.getObjectById(ganji.User.class, user_key);
+			}
+		}catch(Exception e){
+			uid = u.getUserId();
+			Key user_key = KeyFactory.createKey("User", uid);
+			ganji.User user = new ganji.User(user_key,u.getEmail());
+			pm.makePersistent(user);
+			
+		}
+		finally{
+			pm.close();
+		}
+		
+		
 		// get a request dispatcher and launch a jsp that will render our page
 		RequestDispatcher rd = req.getRequestDispatcher("/WEB-INF/root.jsp");
 		rd.forward(req, resp);
