@@ -49,9 +49,9 @@ public class RootServlet extends HttpServlet {
 				for (int i = 0; i < user.getTasks().size(); i++) {
 					Task ctemp = user.getTasks().get(i);
 					if (ctemp.isChecked())
-						current_tasks += "<input type=\"checkbox\" name=\""+i+"complete\" checked>";
+						current_tasks += "<input type=\"checkbox\" name=\"" + i + "complete\" checked>";
 					else
-						current_tasks += "<input type=\"checkbox\" name=\""+i+"complete\" >";
+						current_tasks += "<input type=\"checkbox\" name=\"" + i + "complete\" >";
 
 					current_tasks += "  TASK : " + ctemp.getName() + "  DATE : " + ctemp.getDate()
 							+ "  -----  <input type=\"submit\" name=\"" + (i + "e")
@@ -89,8 +89,8 @@ public class RootServlet extends HttpServlet {
 
 		// updating status
 		if (req.getParameter("update") != null) {
-			if (user.getTasks().size()==0){
-				PrintWriter out=resp.getWriter();
+			if (user.getTasks().size() == 0) {
+				PrintWriter out = resp.getWriter();
 				out.println("<script type=\"text/javascript\">");
 				out.println("alert('" + "Nothing to update !" + "');");
 				out.println("location=" + "'/'" + ";");
@@ -119,6 +119,11 @@ public class RootServlet extends HttpServlet {
 				out.println("location=" + "'/'" + ";");
 				out.println("</script>");
 				break;
+			} else if (req.getParameter((i + "e")) != null) {
+				// Edit this appointment
+				req.getSession().setAttribute("update", user.getTasks().get(i).getId());
+				resp.sendRedirect("/editServlet");
+				break;
 			}
 		}
 	}
@@ -136,13 +141,13 @@ public class RootServlet extends HttpServlet {
 			t.setStatus(status);
 			pm.close();
 			out.println("<script type=\"text/javascript\">");
-			out.println("alert('" + "Status Updated !" + "');");
+			out.println("alert('Status Updated !');");
 			out.println("location=" + "'/'" + ";");
 			out.println("</script>");
 
 		} catch (Exception e) {
 			out.println("<script type=\"text/javascript\">");
-			out.println("alert('" + "Updation Failed !" + "');");
+			out.println("alert('Updation Failed !');");
 			out.println("location=" + "'/'" + ";");
 			out.println("</script>");
 		} finally {
